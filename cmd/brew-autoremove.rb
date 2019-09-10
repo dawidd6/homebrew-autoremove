@@ -7,15 +7,15 @@
 #:      -n, --dry-run                    Just print what would be removed.
 #:      -f, --force                      Remove without confirmation.
 
-require 'json'
-require 'optparse'
+require "json"
+require "optparse"
 
 def package_needed?(packages, package)
-  return true if package['installed'].first['installed_on_request']
+  return true if package["installed"].first["installed_on_request"]
 
   packages.each do |p|
-    p['dependencies'].each do |dep|
-      return true if dep == package['name']
+    p["dependencies"].each do |dep|
+      return true if dep == package["name"]
     end
   end
 
@@ -40,10 +40,10 @@ end
 def parse
   options = {}
   OptionParser.new do |opts|
-    opts.on('-n', '--dry-run', '') do
+    opts.on("-n", "--dry-run", "") do
       options[:dry] = true
     end
-    opts.on('-f', '--force', '') do
+    opts.on("-f", "--force", "") do
       options[:force] = true
     end
   end.parse!
@@ -54,15 +54,15 @@ options = parse
 json = JSON.parse(`brew info --json --installed`)
 removables = get_removable_packages(json)
 removables.each do |r|
-  puts r['name']
+  puts r["name"]
 end
 
-return if removables.empty?
-return if options[:dry]
+exit if removables.length.zero?
+exit if options[:dry]
 
 unless options[:force]
   puts "\n==> Confirm?"
   readline
 end
 
-system 'brew', 'remove', *removables.collect { |r| r['name'] }
+system "brew", "remove", *removables.map { |r| r["name"] }
