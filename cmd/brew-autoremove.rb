@@ -37,16 +37,20 @@ def get_removable_packages(packages)
   removables
 end
 
-options = {}
-OptionParser.new do |opts|
-  opts.on('-n', '--dry-run', '') do
-    options[:dry] = true
-  end
-  opts.on('-f', '--force', '') do
-    options[:force] = true
-  end
-end.parse!
+def parse
+  options = {}
+  OptionParser.new do |opts|
+    opts.on('-n', '--dry-run', '') do
+      options[:dry] = true
+    end
+    opts.on('-f', '--force', '') do
+      options[:force] = true
+    end
+  end.parse!
+  options
+end
 
+options = parse
 json = JSON.parse(`brew info --json --installed`)
 removables = get_removable_packages(json)
 removables.each do |r|
