@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+#:  * `autoremove` [options]
+#:
+#:  Remove packages that are no longer needed.
+#:
+#:      -n, --dry-run                    Just print what would be removed.
+#:      -f, --force                      Remove without confirmation.
+
 import json
 import subprocess
 import argparse
