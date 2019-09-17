@@ -3,14 +3,18 @@ name: Main
 on: push
 
 jobs:
-  newsboat:
-    name: Test autoremoving newsboat deps
+  fish:
+    name: Test autoremoving fish deps
     runs-on: ubuntu-latest
     container: linuxbrew/brew:latest
     steps:
-      - name: Install newsboat deps
-        run: brew install --only-dependencies newsboat
+      - name: Install fish
+        run: brew install fish
+      - name: Remove fish
+        run: brew remove fish
       - name: Tap dawidd6/autoremove
         run: brew tap dawidd6/autoremove
-      - name: Autoremove newsboat deps
+      - name: Autoremove packages
         run: brew autoremove --force
+      - name: Test if everything was removed
+        run: test -z "$(brew list)"
