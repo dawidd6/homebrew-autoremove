@@ -1,0 +1,16 @@
+name: Main
+
+on: push
+
+jobs:
+  newsboat:
+    name: Test autoremoving newsboat deps
+    runs-on: ubuntu-latest
+    container: linuxbrew/brew:latest
+    steps:
+      - name: Install newsboat deps
+        run: brew install --only-dependencies newsboat
+      - name: Tap dawidd6/autoremove
+        run: brew tap dawidd6/autoremove
+      - name: Autoremove newsboat deps
+        run: brew autoremove --force
