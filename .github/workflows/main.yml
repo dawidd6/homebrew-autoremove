@@ -6,7 +6,8 @@ jobs:
   fish:
     name: Test autoremoving fish deps
     runs-on: ubuntu-latest
-    container: linuxbrew/brew:latest
+    container:
+      image: homebrew/brew
     steps:
       - name: Install fish
         run: brew install fish
