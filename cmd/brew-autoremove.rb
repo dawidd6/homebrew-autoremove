@@ -9,7 +9,7 @@ require "json"
 require "optparse"
 
 module Homebrew
-  module_function # all below functions become static
+  module_function
 
   # check if package was installed on request
   def package_requested?(package)
@@ -53,10 +53,10 @@ module Homebrew
 
   dry = false
   force = false
-  parser = OptionParser.new
-  parser.on("-n", "--dry-run", "") { dry = true }
-  parser.on("-f", "--force", "") { force = true }
-  parser.parse!
+  OptionParser.new do |parser|
+    parser.on("-n", "--dry-run", "") { dry = true }
+    parser.on("-f", "--force", "") { force = true }
+  end.parse!
 
   json = JSON.parse(`brew info --json --installed`)
   removables = get_removable_packages(json)
