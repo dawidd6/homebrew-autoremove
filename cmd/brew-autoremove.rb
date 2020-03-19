@@ -65,7 +65,7 @@ module Homebrew
   exit if removables.length.zero?
 
   oh1("Removable packages: " \
-    "#{names.map(&Formatter.method(:identifier)).to_sentence}",
+    "#{names.sort.map(&Formatter.method(:identifier)).to_sentence}",
     truncate: false)
 
   exit if dry
