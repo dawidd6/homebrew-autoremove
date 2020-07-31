@@ -1,10 +1,16 @@
-### Installation
+# homebrew-autoremove
+
+External Homebrew command for removing installed formuale that are no longer needed.
+
+Like `apt autoremove` but for Homebrew.
+
+## Installation
 
 ```sh
 brew tap dawidd6/autoremove
 ```
 
-### Usage
+## Usage
 
 ```sh
 brew autoremove [-f | --force] [-n | --dry-run] [-h | --help]
