@@ -1,3 +1,5 @@
+require "formula"
+
 module Homebrew
   module_function
 
@@ -5,6 +7,7 @@ module Homebrew
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
         `autoremove` [<options>]
+
         Remove packages that are no longer needed.
       EOS
       switch "-n", "--dry-run",
@@ -14,74 +17,48 @@ module Homebrew
     end
   end
 
+  def get_removable_formulae(installed_formulae)
+    removable_formulae = []
 
-  # check if package was installed on request
-  def package_requested?(package)
-    package["installed"].each do |i|
-      return true if i["installed_on_request"]
+    installed_formulae.each do |formula|
+      # Reject formulae installed on request.
+      next if formula.installed_kegs.any? { |keg| Tab.for_keg(keg).installed_on_request }
+      # Reject formulae which are needed at runtime by other formulae.
+      next if installed_formulae.map(&:deps).flatten.uniq.map(&:to_formula).include?(formula)
+
+      removable_formulae << installed_formulae.delete(formula)
+      removable_formulae += get_removable_formulae(installed_formulae)
     end
 
-    false
-  end
-
-  # check if package is needed by another
-  def package_needed?(packages, package)
-    packages.each do |p|
-      p["installed"].each do |i|
-        # need to be safe, cause 'runtime_dependencies' field might not exist
-        i["runtime_dependencies"]&.each do |d|
-          return true if d["full_name"] == package["full_name"]
-        end
-      end
-    end
-
-    false
-  end
-
-  # get packages that could be safely removed
-  def get_removable_packages(packages)
-    removables = []
-
-    packages.each do |package|
-      next if package_requested? package
-      next if package_needed? packages, package
-
-      packages = packages.delete_if { |p| p == package }
-      removables = removables.append(package)
-      removables = removables.concat get_removable_packages(packages)
-      break
-    end
-
-    removables
+    removable_formulae
   end
 
   def autoremove
     args = autoremove_args.parse
 
-    info = Utils.safe_popen_read HOMEBREW_BREW_FILE, "info", "--json", "--installed"
-    json = JSON.parse info
-    removables = get_removable_packages json
-    names = removables.map { |r| r["full_name"] }
+    removable_formulae = get_removable_formulae(Formula.installed)
 
-    exit if removables.length.zero?
+    return if removable_formulae.empty?
 
-    oh1 "Removable packages: " \
-      "#{names.sort.map(&Formatter.method(:identifier)).to_sentence}",
+    formulae_names = removable_formulae.map(&:full_name)
+
+    oh1 "Formulae that could be removed: " \
+      "#{formulae_names.sort.map(&Formatter.method(:identifier)).to_sentence}",
       truncate: false
 
-    exit if args.dry_run?
+    return if args.dry_run?
 
     unless args.force?
       ohai "Proceed?", <<~EOF
         Enter:  yes
         CTRL-C: no
 
-        To mark package as not removable run:
+        To mark formulae as not removable run:
             brew install PACKAGE
       EOF
       readline
     end
 
-    system HOMEBREW_BREW_FILE, "remove", *names
+    system HOMEBREW_BREW_FILE, "rm", *formulae_names
   end
 end
