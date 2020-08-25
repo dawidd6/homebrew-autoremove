@@ -3,31 +3,22 @@ name: Test
 on:
   push:
     branches:
-      - '*'
+      - master
+  pull_request:
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      HOMEBREW_NO_ANALYTICS: 1
-      HOMEBREW_COLOR: 1
     steps:
-      - name: Update Homebrew
-        run: brew update-reset
-      - name: Checkout tap
-        uses: actions/checkout@v2
-      - name: Setup tap
-        run: |
-          mkdir -p $(dirname $(brew --repo $GITHUB_REPOSITORY))
-          ln -s $PWD $(brew --repo $GITHUB_REPOSITORY)
+      - name: Setup Homebrew
+        uses: Homebrew/actions/setup-homebrew@master
       - name: Install fish
         run: brew install fish
       - name: Remove fish
         run: brew remove fish
       - name: Install ncurses
         run: brew install ncurses
-      - name: Autoremove packages
+      - name: Autoremove formulae
         run: brew autoremove --force
-      - name: Test if everything but ncurses was removed
+      - name: Test formulae
         run: test "$(brew list)" = "ncurses"
