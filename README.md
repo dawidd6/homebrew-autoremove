@@ -1,5 +1,7 @@
 # homebrew-autoremove
 
+*This command is now included in `brew`*
+
 External Homebrew command for removing installed formuale that are no longer needed.
 
 Like `apt autoremove` but for Homebrew.
